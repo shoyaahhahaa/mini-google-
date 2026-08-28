@@ -1,7 +1,7 @@
 document.addEventListener(
   "keydown",
   (e) => {
-    if (e.key !== "`") return;
+    if (e.key.toLowerCase() !== "z") return;
     if (e.ctrlKey || e.altKey || e.metaKey) return;
 
     const target = e.target;
@@ -13,9 +13,17 @@ document.addEventListener(
       tag === "SELECT";
 
     if (isEditable) return;
+    if (!chrome.runtime?.id) return; // extension was reloaded; this tab needs a refresh
 
     e.preventDefault();
-    chrome.runtime.sendMessage({ type: "TOGGLE_MINI_GOOGLE" });
+    try {
+      chrome.runtime.sendMessage({
+        type: "TOGGLE_MINI_GOOGLE",
+        keepCurrentFocus: Boolean(document.fullscreenElement)
+      });
+    } catch (err) {
+      // Extension context invalidated (extension was reloaded/updated). Ignore.
+    }
   },
   true
 );

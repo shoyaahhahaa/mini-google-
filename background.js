@@ -7,10 +7,15 @@ async function getPopupWindowId() {
 }
 
 async function setPopupWindowId(id) {
+  if (id === null) {
+    await chrome.storage.session.remove("popupWindowId");
+    return;
+  }
+
   await chrome.storage.session.set({ popupWindowId: id });
 }
 
-async function toggleMiniGoogle() {
+async function toggleMiniGoogle(options = {}) {
   const existingId = await getPopupWindowId();
 
   if (existingId !== null) {
@@ -31,9 +36,13 @@ async function toggleMiniGoogle() {
     height: HEIGHT,
     top: 80,
     left: 80,
-    focused: true
+    focused: !options.keepCurrentFocus
   });
   await setPopupWindowId(win.id);
+
+  if (options.keepCurrentFocus) {
+    await chrome.windows.update(win.id, { drawAttention: true });
+  }
 }
 
 chrome.windows.onRemoved.addListener(async (windowId) => {
@@ -45,7 +54,7 @@ chrome.windows.onRemoved.addListener(async (windowId) => {
 
 chrome.runtime.onMessage.addListener((message) => {
   if (message?.type === "TOGGLE_MINI_GOOGLE") {
-    toggleMiniGoogle();
+    toggleMiniGoogle({ keepCurrentFocus: Boolean(message.keepCurrentFocus) });
   }
 });
 
