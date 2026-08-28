@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Mini Google",
+  "version": "1.0.0",
+  "description": "Toggle a small floating Google search window with the ` key. Doesn't switch tabs or go fullscreen.",
+  "permissions": ["storage", "windows"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Toggle Mini Google (`)"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
